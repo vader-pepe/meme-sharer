@@ -1,4 +1,4 @@
-import { InstagramInstance } from './Module/bot';
+import { InstagramInstance } from './Module/instagram';
 import { Meme } from './Module/meme-sharer';
 import 'dotenv/config'
 
