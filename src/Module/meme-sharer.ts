@@ -1,4 +1,4 @@
-import { IgApiClient } from 'instagram-private-api';
+import { IgApiClient, } from 'instagram-private-api';
 import cron from 'node-cron'
 import { writeFile, readFile } from 'fs/promises'
 import pngToPng from 'png-to-jpeg'
@@ -16,13 +16,11 @@ interface MemeDataIF {
 }
 
 export class Meme {
-  ig: IgApiClient
 
-  constructor(ig: IgApiClient) {
-    this.ig = ig;
+  constructor() {
   }
 
-  start(schedule: string) {
+  start(schedule: string, ig: IgApiClient) {
     cron.schedule(schedule, async () => {
       console.log('cron running')
       const meme = await this.parseMeme()
@@ -30,11 +28,11 @@ export class Meme {
       const extension = splitted[splitted.length - 1]
       const fimg = await fetch(meme.url)
       const fimgb = Buffer.from(await fimg.arrayBuffer())
-      await this.post(fimgb, extension)
+      await this.post(fimgb, extension, ig)
     })
   }
 
-  async post(data: Buffer, extension: string) {
+  async post(data: Buffer, extension: string, ig: IgApiClient) {
     let converted: Buffer
     if (extension === 'png') {
       pngToPng({ quality: 90 })(data).then(async (output: string) => await writeFile('./img.jpg', output))
@@ -45,7 +43,7 @@ export class Meme {
       console.log('enough meme for today')
     }
 
-    const publishResult = await this.ig.publish.photo({
+    const publishResult = await ig.publish.photo({
       file: converted
     }).catch(err => {
       console.log({ err })
